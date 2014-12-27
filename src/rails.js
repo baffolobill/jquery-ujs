@@ -53,17 +53,47 @@
 
     // Button onClick disable selector with possible reenable after remote submission
     buttonDisableSelector: 'button[data-remote][data-disable-with], button[data-remote][data-disable]',
+    
+    getCookie: function(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie != '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = $.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    },
+    
+    getCSRFToken = function() {
+      //return $('#csrf_token input').val();
+      return getCookie('csrftoken');
+    },
+    
+    csrfSafeMethod: function(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    },
+    
+    getCSRFParam: function() {
+      return 'csrfmiddlewaretoken';
+    },
 
     // Make sure that every Ajax request sends the CSRF token
     CSRFProtection: function(xhr) {
-      var token = $('meta[name="csrf-token"]').attr('content');
-      if (token) xhr.setRequestHeader('X-CSRF-Token', token);
+      var token = getCSRFToken();
+      if (token) xhr.setRequestHeader('X-CSRFToken', token);
     },
 
     // making sure that all forms have actual up-to-date token(cached forms contain old one)
     refreshCSRFTokens: function(){
-      var csrfToken = $('meta[name=csrf-token]').attr('content');
-      var csrfParam = $('meta[name=csrf-param]').attr('content');
+      var csrfToken = getCSRFToken();
+      var csrfParam = getCSRFParam();
       $('form input[name="' + csrfParam + '"]').val(csrfToken);
     },
 
@@ -173,10 +203,10 @@
       var href = rails.href(link),
         method = link.data('method'),
         target = link.attr('target'),
-        csrfToken = $('meta[name=csrf-token]').attr('content'),
-        csrfParam = $('meta[name=csrf-param]').attr('content'),
+        csrfToken = getCSRFToken(),
+        csrfParam = getCSRFParam(),
         form = $('<form method="post" action="' + href + '"></form>'),
-        metadataInput = '<input name="_method" value="' + method + '" type="hidden" />';
+        metadataInput = '';
 
       if (csrfParam !== undefined && csrfToken !== undefined) {
         metadataInput += '<input name="' + csrfParam + '" value="' + csrfToken + '" type="hidden" />';
