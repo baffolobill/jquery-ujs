@@ -53,7 +53,7 @@
 
     // Button onClick disable selector with possible reenable after remote submission
     buttonDisableSelector: 'button[data-remote][data-disable-with], button[data-remote][data-disable]',
-    
+
     getCookie: function(name) {
       var cookieValue = null;
       if (document.cookie && document.cookie != '') {
@@ -69,31 +69,31 @@
       }
       return cookieValue;
     },
-    
+
     getCSRFToken: function() {
       //return $('#csrf_token input').val();
-      return getCookie('csrftoken');
+      return rails.getCookie('csrftoken');
     },
-    
+
     csrfSafeMethod: function(method) {
       // these HTTP methods do not require CSRF protection
       return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     },
-    
+
     getCSRFParam: function() {
       return 'csrfmiddlewaretoken';
     },
 
     // Make sure that every Ajax request sends the CSRF token
     CSRFProtection: function(xhr) {
-      var token = getCSRFToken();
+      var token = rails.getCSRFToken();
       if (token) xhr.setRequestHeader('X-CSRFToken', token);
     },
 
     // making sure that all forms have actual up-to-date token(cached forms contain old one)
     refreshCSRFTokens: function(){
-      var csrfToken = getCSRFToken();
-      var csrfParam = getCSRFParam();
+      var csrfToken = rails.getCSRFToken();
+      var csrfParam = rails.getCSRFParam();
       $('form input[name="' + csrfParam + '"]').val(csrfToken);
     },
 
@@ -203,8 +203,8 @@
       var href = rails.href(link),
         method = link.data('method'),
         target = link.attr('target'),
-        csrfToken = getCSRFToken(),
-        csrfParam = getCSRFParam(),
+        csrfToken = rails.getCSRFToken(),
+        csrfParam = rails.getCSRFParam(),
         form = $('<form method="post" action="' + href + '"></form>'),
         metadataInput = '';
 
