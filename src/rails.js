@@ -70,7 +70,7 @@
       return cookieValue;
     },
     
-    getCSRFToken = function() {
+    getCSRFToken: function() {
       //return $('#csrf_token input').val();
       return getCookie('csrftoken');
     },
